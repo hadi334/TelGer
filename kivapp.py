@@ -75,8 +75,6 @@ class bg_change(FloatLayout):
         self.rect.size = wid.size
 
 
-
-
 class EntryField(FloatLayout):
     now = datetime.now()
     try:
@@ -90,8 +88,6 @@ class EntryField(FloatLayout):
     except:
         pass
         
-        
-    
             
     def __init__(self, title, grp, categories=['Alfa', 'Touch'], **kwargs):
         super().__init__(**kwargs)
