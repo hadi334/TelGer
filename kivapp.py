@@ -3,6 +3,8 @@
 from kivy.config import Config
 Config.set('graphics', 'resizable', '0')
 Config.set('kivy', 'exit_on_escape', '0')
+# test test test
+#GGGGG
 
 import json
 from datetime import datetime
