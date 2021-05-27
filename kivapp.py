@@ -3,8 +3,6 @@
 from kivy.config import Config
 Config.set('graphics', 'resizable', '0')
 Config.set('kivy', 'exit_on_escape', '0')
-# test test test
-#GGGGG
 
 import json
 from datetime import datetime
@@ -457,8 +455,7 @@ class EditPopup(Popup):
         self.inlayout = FloatLayout(size_hint=(1, 1),
                                     pos_hint={'x': 0, 'y': 0})
 
-        self.igr = ['alfa days', 'touch days']
-        self.labels = [txt.upper() for txt in AmountsField.existing_amounts_dict.keys()if txt not in self.igr]
+        self.labels = [txt.upper() for txt in AmountsField.existing_amounts_dict.keys()]
 
         self.to_be_edited = Spinner(size_hint=(0.45, 0.25),
                                     pos_hint={'x': 0.05, 'y': 0.6},
@@ -546,8 +543,14 @@ class EditPopup(Popup):
 
         self.edited_title = self.to_be_edited.text.lower()
         self.current_value = AmountsField.existing_amounts_dict[self.edited_title]
-        edit_number = float(self.input_num.text)
-        if self.edited_title in ['alfa days', 'touch days']:
+
+        try:
+            edit_number = float(self.input_num.text)
+        except ValueError:
+            edit_number = 1
+
+
+        if self.edited_title in ['alfa days', 'touch days'] and self.price_checkbox.state != "down":
             days_add_text = '[b]Cannot Add/Remove Days![/b]'
             return self._label_popup('Error', days_add_text)
         
