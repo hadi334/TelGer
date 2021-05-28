@@ -1,4 +1,5 @@
-#! usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Python Used 3.9.0
 from kivy.config import Config
 Config.set('graphics', 'resizable', '0')
@@ -241,10 +242,14 @@ class EntryField(FloatLayout):
         if self.title.lower() == 'dollars':
             alltext = f'{self.checked_box.lower()} {self.title.lower()}'
             existing = AmountsField.existing_amounts_dict[alltext]
-            if int(self.amt_input.text) > existing[0]:
-                return self.error_popup('You can\'t sell more than what you have!')
-
             company_take = AmountsField.existing_amounts_dict[f'{self.checked_box.lower()} dollars taken'][1]
+
+            if int(self.amt_input.text) > (existing[0]+company_take):
+                return self.error_popup()
+
+            if (int(self.price.text)/int(self.amt_input.text)) < existing[1]:
+                return self.error_popup('Cannot sell for less than buying price')
+
             existing[0] -= (float(self.amt_input.text) + company_take)
             AmountsField.labels_dict[alltext].text = f'{alltext.capitalize()}: {format(existing[0], ".2f")}'
 
@@ -253,14 +258,29 @@ class EntryField(FloatLayout):
         elif self.title.lower() == 'days':
             ind = f'{self.checked_box.lower()} big cards'
             existing_bc = AmountsField.existing_amounts_dict[ind]
+            if int(self.amt_input.text) > existing_bc[0]:
+                return self.error_popup()
+
+            days_price = AmountsField.existing_amounts_dict[f'{self.checked_box.lower()} {self.title.lower()}'][1]
+
+            if (int(self.price.text)/int(self.amt_input.text)) < days_price:
+                return self.error_popup('Cannot sell for less than buying price')
+
             existing_bc[0] -= int(self.amt_input.text)
             AmountsField.labels_dict[ind].text = f'{ind.capitalize()}: {existing_bc[0]}'
-            days_price = AmountsField.existing_amounts_dict[f'{self.checked_box.lower()} {self.title.lower()}'][1]
+            
             self.add_row(f'{self.checked_box.lower()} {self.title.lower()}', days_price)
 
         elif self.title.lower() == 'cards':
             type_of_card = f'{self.checked_box.lower()} {self.card_choose.text.lower()} {self.title.lower()}'
             existing_card = AmountsField.existing_amounts_dict[type_of_card]
+
+            if int(self.amt_input.text) > existing_card[0]:
+                return self.error_popup()
+
+            if (int(self.price.text)/int(self.amt_input.text)) < existing_card[1]:
+                return self.error_popup('Cannot sell for less than buying price')
+
             existing_card[0] -= int(self.amt_input.text)
             AmountsField.labels_dict[type_of_card].text = f'{type_of_card.capitalize()}: {existing_card[0]}'
             self.add_row(type_of_card, existing_card[1])
@@ -272,7 +292,7 @@ class EntryField(FloatLayout):
         with open('.storage.json', 'w') as f:
             json.dump(AmountsField.existing_amounts_dict, f)
 
-    def error_popup(self, error_text):
+    def error_popup(self, error_text='You can\'t sell more than what you have!'):
         popup_label = Label(text=error_text,
                             font_size=22)
 
@@ -289,7 +309,8 @@ class EntryField(FloatLayout):
         total_buying_price = (buying_price * int(self.amt_input.text))
         self.ws['E' + str(max_row)] = int(self.price.text) - total_buying_price
         self.ws['F' + str(max_row)] = total_buying_price
-        TotalSelledField.totals[f"{datetime.now().strftime('%d')}"] += int(self.price.text)
+        print('\n\n\n\n', TotalSelledField.totals[f"{datetime.now().strftime('%d')}"], int(self.price.text),'\n\n\n\n')
+        TotalSelledField.totals[f"{datetime.now().strftime('%d')}"][1] += int(self.price.text)
         
         with open(TotalSelledField.totals_path, 'w') as f:
             json.dump(TotalSelledField.totals, f)
