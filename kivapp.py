@@ -244,7 +244,7 @@ class EntryField(FloatLayout):
             existing = AmountsField.existing_amounts_dict[alltext]
             company_take = AmountsField.existing_amounts_dict[f'{self.checked_box.lower()} dollars taken'][1]
 
-            if int(self.amt_input.text) > (existing[0]+company_take):
+            if (existing[0] - (int(self.amt_input.text) + company_take)) < 0:
                 return self.error_popup()
 
             if (int(self.price.text)/int(self.amt_input.text)) < existing[1]:
@@ -267,7 +267,7 @@ class EntryField(FloatLayout):
                 return self.error_popup('Cannot sell for less than buying price')
 
             existing_bc[0] -= int(self.amt_input.text)
-            AmountsField.labels_dict[ind].text = f'{ind.capitalize()}: {existing_bc[0]}'
+            AmountsField.labels_dict[ind].text = f'{ind.capitalize()}: {int(existing_bc[0])}'
             
             self.add_row(f'{self.checked_box.lower()} {self.title.lower()}', days_price)
 
@@ -282,7 +282,7 @@ class EntryField(FloatLayout):
                 return self.error_popup('Cannot sell for less than buying price')
 
             existing_card[0] -= int(self.amt_input.text)
-            AmountsField.labels_dict[type_of_card].text = f'{type_of_card.capitalize()}: {existing_card[0]}'
+            AmountsField.labels_dict[type_of_card].text = f'{type_of_card.capitalize()}: {int(existing_card[0])}'
             self.add_row(type_of_card, existing_card[1])
 
         elif self.title.lower() == 'other':
@@ -309,7 +309,6 @@ class EntryField(FloatLayout):
         total_buying_price = (buying_price * int(self.amt_input.text))
         self.ws['E' + str(max_row)] = int(self.price.text) - total_buying_price
         self.ws['F' + str(max_row)] = total_buying_price
-        print('\n\n\n\n', TotalSelledField.totals[f"{datetime.now().strftime('%d')}"], int(self.price.text),'\n\n\n\n')
         TotalSelledField.totals[f"{datetime.now().strftime('%d')}"][1] += int(self.price.text)
         
         with open(TotalSelledField.totals_path, 'w') as f:
