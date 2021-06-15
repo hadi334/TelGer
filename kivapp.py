@@ -371,9 +371,14 @@ class TotalSelledField(FloatLayout):
                                   pos_hint={'x': 0.1, 'y': 0.5},
                                   font_size=17)
         self.add_widget(self.total_selled)
-        self.show_btn = Button(text='Show Charts',
+        self.show_btn = Button(text='[b]Show\nCharts[/b]',
                                pos_hint={'x': 0.6, 'y': 0},
-                               size_hint=(0.3, 0.3))
+                               size_hint=(0.23, 0.43),
+                               background_normal='',
+                               background_color=get_color_from_hex('#6E44FF'),
+                               color=get_color_from_hex('#251333'),
+                               font_size=18,
+                               markup=True,)
         self.add_widget(self.show_btn)
         self.show_btn.bind(on_release=self.plot_it)
 
@@ -386,12 +391,13 @@ class TotalSelledField(FloatLayout):
 
     def plot_it(self, *args):
         self.fig, self.axs = plt.subplots(figsize=(15, 9))
-        plt.style.use('seaborn-darkgrid')
         x_rng = [int(x) for x in self.totals.keys()]
         self.y_rng = self.totals.values()
+        print(self.y_rng)
         plt.xticks(arange(1, max(x_rng) + 1, 1))
-        plt.yticks(arange(0, max(self.y_rng) + 100000, 200000))
-        self.line = plt.plot(x_rng, self.y_rng, marker='o')
+        plt.yticks(arange(0, 1000000, 200000))
+        self.ordered_totals = [i[-1] for i in list(self.y_rng)]
+        self.line = plt.plot(x_rng, self.ordered_totals, marker='o')
         saving_path = f"storage/{self.year}/{self.mnth}/{self.now.strftime('%B')}-graph.jpeg"
 
         self.annot = self.axs.annotate("", xy=(0, 0), xytext=(-20, 20), textcoords="offset points",
@@ -401,17 +407,20 @@ class TotalSelledField(FloatLayout):
         
         self.fig.canvas.mpl_connect("motion_notify_event", self.hover)
         plt.show()
+
         self.axs.ticklabel_format(useOffset=False, style='plain')
-        for i, j, w in zip(x_rng, self.y_rng, range(1, len(x_rng) + 1)):
-            self.axs.annotate(str(j), xy=(i-0.5, j))
+        for i, j, w in zip(x_rng, self.ordered_totals, range(1, len(x_rng) + 1)):
+            self.axs.annotate(str(j), xy=(i-0.1, j+0.1))
 
         self.fig.savefig(saving_path, bbox_inches='tight')
+        
 
     def update_annot(self, ind):
         x, y = self.line[0].get_data()
+        print(x, y)
         self.annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-        text = f"Day {int(' '.join(list(map(str, ind['ind']))))+1}: {int(' '.join([str(list(self.y_rng)[n]) for n in ind['ind']])):,}"
-
+        text = f"Day {int(' '.join(list(map(str, ind['ind']))))+1}: {int(' '.join([str(self.ordered_totals[n]) for n in ind['ind']])):,}"
+        print(text)
         self.annot.set_text(text)
         self.annot.get_bbox_patch().set_alpha(0.4)
 
